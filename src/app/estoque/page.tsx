@@ -4,6 +4,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { toggleProduct } from "@/features/products/actions";
+import { formatCurrency } from "@/lib/formatters";
 import { createClient } from "@/lib/supabase/server";
 
 export const instant = false;
@@ -52,10 +53,7 @@ export default async function InventoryPage() {
                   >
                     <td className="p-4 font-semibold">{product.name}</td>
                     <td className="p-4">
-                      {Number(product.sale_price).toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
+                      {formatCurrency(product.sale_price)}
                     </td>
                     <td className="p-4">{product.total_stock}</td>
                     <td className="p-4">
