@@ -8,6 +8,8 @@ O ModaStore usa Next.js App Router como aplicação fullstack e Supabase para au
 
 O navegador recebe apenas a URL e a chave publicável do Supabase. Autorização nunca depende de dados fornecidos pelo navegador: todas as tabelas de negócio terão RLS habilitada e forçada, associando cada linha à loja retornada por `private.current_store_id()`.
 
+O `proxy.ts` renova cookies e valida o JWT com `getClaims()` antes de liberar rotas privadas. Respostas que atualizam sessão recebem os cabeçalhos privados fornecidos por `@supabase/ssr`, evitando cache compartilhado em CDNs.
+
 ## Organização
 
 - `src/app`: rotas e layouts

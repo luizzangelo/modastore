@@ -18,6 +18,7 @@ import Link from "next/link";
 import { useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
+import { logout } from "@/features/auth/actions";
 import { cn } from "@/lib/utils";
 
 const navigation = [
@@ -103,9 +104,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             </span>
             <ChevronDown aria-hidden="true" size={16} className="text-muted" />
           </button>
-          <button className="text-muted mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-red-50 hover:text-red-600">
-            <LogOut aria-hidden="true" size={18} /> Sair
-          </button>
+          <form action={logout}>
+            <button className="text-muted mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-red-50 hover:text-red-600">
+              <LogOut aria-hidden="true" size={18} /> Sair
+            </button>
+          </form>
         </div>
       </aside>
       <main className="min-w-0 p-4 sm:p-6 lg:p-8">{children}</main>
