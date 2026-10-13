@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ function Brand() {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[260px_1fr]">
       <header className="border-border sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white px-4 lg:hidden">
@@ -74,14 +76,15 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Brand />
         </div>
         <nav aria-label="Menu principal" className="flex flex-1 flex-col gap-1">
-          {navigation.map(({ label, icon: Icon, href }, index) => (
+          {navigation.map(({ label, icon: Icon, href }) => (
             <Link
               key={href}
               href={href}
               onClick={() => setOpen(false)}
               className={cn(
                 "text-muted hover:text-primary flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors hover:bg-violet-50",
-                index === 0 && "text-primary bg-violet-50",
+                (href === "/" ? pathname === "/" : pathname.startsWith(href)) &&
+                  "text-primary bg-violet-50",
               )}
             >
               <Icon aria-hidden="true" size={19} />
