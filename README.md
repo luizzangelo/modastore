@@ -2,7 +2,7 @@
 
 Sistema open source de gestão multi-loja para o varejo de moda. Cada lojista acessa somente os dados da própria loja por meio das políticas RLS do Supabase.
 
-> Em desenvolvimento: a Fase 1 (fundação) está pronta. Banco, autenticação e módulos de negócio serão entregues nas fases seguintes descritas em [`docs/architecture.md`](docs/architecture.md).
+> Em desenvolvimento: as fases de fundação, banco/segurança, autenticação e estoque estão implementadas. Clientes, vendas, contas a receber e relatórios seguem nas próximas fases descritas em [`docs/architecture.md`](docs/architecture.md).
 
 ## Stack
 
