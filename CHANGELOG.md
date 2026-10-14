@@ -18,3 +18,4 @@ Todas as mudanças relevantes serão registradas neste arquivo seguindo Semantic
 - Manifesto Docker Swarm com Traefik e instruções exatas de DNS no Cloudflare.
 - Teste E2E do fluxo principal, do login aos relatórios e recebimentos.
 - Grades de produto condicionais, busca de clientes nas vendas e períodos rápidos nos relatórios.
+- Documentação open source consolidada e configuração de publicação sem dados específicos de ambiente.
