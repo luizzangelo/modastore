@@ -74,6 +74,13 @@ export type Database = {
             foreignKeyName: "customers_store_id_fkey";
             columns: ["store_id"];
             isOneToOne: false;
+            referencedRelation: "receivables_summary";
+            referencedColumns: ["store_id"];
+          },
+          {
+            foreignKeyName: "customers_store_id_fkey";
+            columns: ["store_id"];
+            isOneToOne: false;
             referencedRelation: "stores";
             referencedColumns: ["id"];
           },
@@ -127,6 +134,13 @@ export type Database = {
             foreignKeyName: "product_variants_store_id_fkey";
             columns: ["store_id"];
             isOneToOne: false;
+            referencedRelation: "receivables_summary";
+            referencedColumns: ["store_id"];
+          },
+          {
+            foreignKeyName: "product_variants_store_id_fkey";
+            columns: ["store_id"];
+            isOneToOne: false;
             referencedRelation: "stores";
             referencedColumns: ["id"];
           },
@@ -168,6 +182,13 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "products_store_id_fkey";
+            columns: ["store_id"];
+            isOneToOne: false;
+            referencedRelation: "receivables_summary";
+            referencedColumns: ["store_id"];
+          },
           {
             foreignKeyName: "products_store_id_fkey";
             columns: ["store_id"];
@@ -226,6 +247,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "receivables_with_status";
             referencedColumns: ["id", "store_id"];
+          },
+          {
+            foreignKeyName: "receivable_payments_store_id_fkey";
+            columns: ["store_id"];
+            isOneToOne: false;
+            referencedRelation: "receivables_summary";
+            referencedColumns: ["store_id"];
           },
           {
             foreignKeyName: "receivable_payments_store_id_fkey";
@@ -306,6 +334,13 @@ export type Database = {
             foreignKeyName: "receivables_store_id_fkey";
             columns: ["store_id"];
             isOneToOne: false;
+            referencedRelation: "receivables_summary";
+            referencedColumns: ["store_id"];
+          },
+          {
+            foreignKeyName: "receivables_store_id_fkey";
+            columns: ["store_id"];
+            isOneToOne: false;
             referencedRelation: "stores";
             referencedColumns: ["id"];
           },
@@ -373,6 +408,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "sales";
             referencedColumns: ["id", "store_id"];
+          },
+          {
+            foreignKeyName: "sale_items_store_id_fkey";
+            columns: ["store_id"];
+            isOneToOne: false;
+            referencedRelation: "receivables_summary";
+            referencedColumns: ["store_id"];
           },
           {
             foreignKeyName: "sale_items_store_id_fkey";
@@ -456,6 +498,13 @@ export type Database = {
             foreignKeyName: "sales_store_id_fkey";
             columns: ["store_id"];
             isOneToOne: false;
+            referencedRelation: "receivables_summary";
+            referencedColumns: ["store_id"];
+          },
+          {
+            foreignKeyName: "sales_store_id_fkey";
+            columns: ["store_id"];
+            isOneToOne: false;
             referencedRelation: "stores";
             referencedColumns: ["id"];
           },
@@ -509,6 +558,13 @@ export type Database = {
             foreignKeyName: "customers_store_id_fkey";
             columns: ["store_id"];
             isOneToOne: false;
+            referencedRelation: "receivables_summary";
+            referencedColumns: ["store_id"];
+          },
+          {
+            foreignKeyName: "customers_store_id_fkey";
+            columns: ["store_id"];
+            isOneToOne: false;
             referencedRelation: "stores";
             referencedColumns: ["id"];
           },
@@ -534,10 +590,42 @@ export type Database = {
             foreignKeyName: "products_store_id_fkey";
             columns: ["store_id"];
             isOneToOne: false;
+            referencedRelation: "receivables_summary";
+            referencedColumns: ["store_id"];
+          },
+          {
+            foreignKeyName: "products_store_id_fkey";
+            columns: ["store_id"];
+            isOneToOne: false;
             referencedRelation: "stores";
             referencedColumns: ["id"];
           },
         ];
+      };
+      receivables_summary: {
+        Row: {
+          due_next_seven_days: number | null;
+          overdue: number | null;
+          received_this_month: number | null;
+          store_id: string | null;
+          total_outstanding: number | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          due_next_seven_days?: never;
+          overdue?: never;
+          received_this_month?: never;
+          store_id?: string | null;
+          total_outstanding?: never;
+        };
+        Update: {
+          due_next_seven_days?: never;
+          overdue?: never;
+          received_this_month?: never;
+          store_id?: string | null;
+          total_outstanding?: never;
+        };
+        Relationships: [];
       };
       receivables_with_status: {
         Row: {
@@ -581,6 +669,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "sales";
             referencedColumns: ["id", "store_id"];
+          },
+          {
+            foreignKeyName: "receivables_store_id_fkey";
+            columns: ["store_id"];
+            isOneToOne: false;
+            referencedRelation: "receivables_summary";
+            referencedColumns: ["store_id"];
           },
           {
             foreignKeyName: "receivables_store_id_fkey";

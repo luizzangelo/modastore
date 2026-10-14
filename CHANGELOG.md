@@ -12,3 +12,4 @@ Todas as mudanças relevantes serão registradas neste arquivo seguindo Semantic
 - Cadastro e listagem de produtos com grade de tamanhos e status de estoque.
 - Gestão de clientes com busca, edição, WhatsApp, saldo devedor e inativação.
 - Fluxo de vendas itemizadas ou manuais, fiado parcelado, histórico, cancelamento e comprovante CSV.
+- Contas a receber manuais e automáticas, pagamentos parciais, quitação, cobrança e estorno.
