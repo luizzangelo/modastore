@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  app:
+    image: modastore:${IMAGE_TAG:-latest}
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: "0.0.0.0"
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
+      NEXT_PUBLIC_ALLOW_SIGNUP: "false"
+      NEXT_PUBLIC_APP_URL: https://modastore.luizangelo.com.br
+    networks:
+      - network_public
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/login').then((r)=>process.exit(r.status<500?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    deploy:
+      replicas: 1
+      update_config:
+        order: start-first
+        parallelism: 1
+        failure_action: rollback
+      rollback_config:
+        order: stop-first
+        parallelism: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
+        reservations:
+          cpus: "0.10"
+          memory: 128M
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=network_public
+        - traefik.http.routers.modastore.entrypoints=websecure
+        - traefik.http.routers.modastore.rule=Host(`modastore.luizangelo.com.br`)
+        - traefik.http.routers.modastore.service=modastore
+        - traefik.http.routers.modastore.tls.certresolver=letsencryptresolver
+        - traefik.http.services.modastore.loadbalancer.passHostHeader=true
+        - traefik.http.services.modastore.loadbalancer.server.port=3000
+
+networks:
+  network_public:
+    external: true

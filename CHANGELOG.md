@@ -15,3 +15,4 @@ Todas as mudanças relevantes serão registradas neste arquivo seguindo Semantic
 - Contas a receber manuais e automáticas, pagamentos parciais, quitação, cobrança e estorno.
 - Dashboard operacional e relatórios mensais com ranking de clientes.
 - Configurações do nome da loja e alteração segura de senha.
+- Manifesto Docker Swarm com Traefik e instruções exatas de DNS no Cloudflare.

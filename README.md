@@ -2,7 +2,7 @@
 
 Sistema open source de gestão multi-loja para o varejo de moda. Cada lojista acessa somente os dados da própria loja por meio das políticas RLS do Supabase.
 
-> Em desenvolvimento: as fases de fundação, banco/segurança, autenticação e estoque estão implementadas. Clientes, vendas, contas a receber e relatórios seguem nas próximas fases descritas em [`docs/architecture.md`](docs/architecture.md).
+O MVP inclui autenticação, estoque por tamanho, clientes, vendas itemizadas e manuais, fiado, contas a receber, dashboard, relatórios e configurações.
 
 ## Stack
 
