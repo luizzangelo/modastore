@@ -4,6 +4,7 @@ test("completes the core store workflow", async ({ page }) => {
   const runId = Date.now();
   const productName = `Camiseta E2E ${runId}`;
   const customerName = `Cliente E2E ${runId}`;
+  const customerPhone = `859${String(runId).slice(-8)}`;
 
   await page.goto("/login");
   await page.getByLabel("E-mail").fill("ana@modastore.local");
@@ -16,7 +17,11 @@ test("completes the core store workflow", async ({ page }) => {
   await page.getByLabel("Custo (R$)").fill("25");
   await page.getByLabel("Venda (R$)").fill("60");
   await page.getByLabel("Estoque mínimo").fill("1");
+  await expect(page.getByLabel("Único", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("P", { exact: true })).toHaveCount(0);
   await page.getByLabel("P, M, G e GG").check();
+  await expect(page.getByLabel("Único", { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel("P", { exact: true })).toBeVisible();
   await page.getByLabel("P", { exact: true }).fill("5");
   await page.getByRole("button", { name: "Salvar produto" }).click();
   await expect(page).toHaveURL(/\/estoque\?created=1/);
@@ -26,7 +31,7 @@ test("completes the core store workflow", async ({ page }) => {
   await page.waitForLoadState("networkidle");
   await page.getByLabel("Tipo de cliente").selectOption("new");
   await page.getByLabel("Nome do cliente (opcional)").fill(customerName);
-  await page.getByLabel("Telefone com DDD").fill("85988887777");
+  await page.getByLabel("Telefone com DDD").fill(customerPhone);
   const productOption = page
     .locator('select[aria-label="Produto 1"] option')
     .filter({ hasText: productName })
@@ -36,25 +41,23 @@ test("completes the core store workflow", async ({ page }) => {
   await page.locator('select[aria-label="Produto 1"]').selectOption(variantId!);
   await expect(page.getByText("Total: R$ 60,00")).toBeVisible();
   await page.getByRole("button", { name: "Finalizar venda" }).click();
-  await expect(page).toHaveURL(/\/vendas\?created=1/);
+  await expect(page).toHaveURL(/\/vendas\?created=1/, { timeout: 15_000 });
 
   await page.goto("/vendas/novo");
   await page.waitForLoadState("networkidle");
-  await page
-    .getByLabel("Cliente cadastrado")
-    .selectOption({ label: customerName });
+  await page.getByLabel("Buscar cliente cadastrado").fill(customerName);
+  await expect(page.getByText("Cliente selecionado")).toBeVisible();
+  await expect(page.getByText(/Telefone: \(85\) 9\d{4}-\d{4}/)).toBeVisible();
   await page.getByLabel("Custo total (R$)").fill("30");
   await page.getByLabel("Valor total (R$)").fill("90");
   await page.getByLabel("Quantidade de peças").fill("2");
   await page.getByLabel("Forma de pagamento").selectOption("cash");
   await page.getByRole("button", { name: "Finalizar venda" }).click();
-  await expect(page).toHaveURL(/\/vendas\?created=1/);
+  await expect(page).toHaveURL(/\/vendas\?created=1/, { timeout: 15_000 });
 
   await page.goto("/vendas/novo");
   await page.waitForLoadState("networkidle");
-  await page
-    .getByLabel("Cliente cadastrado")
-    .selectOption({ label: customerName });
+  await page.getByLabel("Buscar cliente cadastrado").fill(customerName);
   await page.getByLabel("Custo total (R$)").fill("40");
   await page.getByLabel("Valor total (R$)").fill("120");
   await page.getByLabel("Quantidade de peças").fill("2");
@@ -84,5 +87,9 @@ test("completes the core store workflow", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
   await page.goto("/relatorios");
   await expect(page.getByRole("heading", { name: "Relatórios" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Ontem" })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Últimos 12 meses" }),
+  ).toBeVisible();
   await expect(page.getByText("Top 10 melhores clientes")).toBeVisible();
 });

@@ -24,6 +24,13 @@ export const saleSchema = z
     firstDueDate: z.string(),
   })
   .superRefine((value, context) => {
+    if (value.customerType === "existing" && !value.customerId) {
+      context.addIssue({
+        code: "custom",
+        path: ["customerId"],
+        message: "Selecione um cliente cadastrado.",
+      });
+    }
     const hasCustomer = Boolean(value.customerId || value.customerName);
     if (value.paymentMethod === "credit" && !hasCustomer) {
       context.addIssue({

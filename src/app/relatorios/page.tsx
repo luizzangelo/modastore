@@ -1,21 +1,24 @@
+import Link from "next/link";
 import { connection } from "next/server";
 import { AppShell } from "@/components/layout/app-shell";
 import { Card } from "@/components/ui/card";
 import { ReportCharts } from "@/features/reports/report-charts";
+import { getReportPeriods } from "@/features/reports/periods";
 import { formatCurrency, formatDate } from "@/lib/formatters";
 import { createClient } from "@/lib/supabase/server";
 
 export const instant = false;
 
-function defaultPeriod() {
-  const end = new Date();
-  const start = new Date(
-    Date.UTC(end.getUTCFullYear(), end.getUTCMonth() - 11, 1),
-  );
-  return {
-    start: start.toISOString().slice(0, 10),
-    end: end.toISOString().slice(0, 10),
-  };
+function currentDateInFortaleza() {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Fortaleza",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((item) => item.type === type)?.value ?? "";
+  return `${part("year")}-${part("month")}-${part("day")}`;
 }
 
 export default async function ReportsPage({
@@ -25,7 +28,8 @@ export default async function ReportsPage({
 }) {
   await connection();
   const selected = await searchParams;
-  const defaults = defaultPeriod();
+  const periods = getReportPeriods(currentDateInFortaleza());
+  const defaults = periods.at(-1)!;
   const start = /^\d{4}-\d{2}-\d{2}$/.test(selected.start ?? "")
     ? selected.start!
     : defaults.start;
@@ -56,6 +60,31 @@ export default async function ReportsPage({
             Resultados por competência e recebimentos por regime de caixa.
           </p>
         </div>
+        <nav
+          aria-label="Períodos predefinidos"
+          className="mb-4 flex flex-wrap gap-2"
+        >
+          {periods.map((period) => {
+            const active = period.start === start && period.end === end;
+            return (
+              <Link
+                key={period.label}
+                href={{
+                  pathname: "/relatorios",
+                  query: { start: period.start, end: period.end },
+                }}
+                aria-current={active ? "page" : undefined}
+                className={`rounded-full border px-3 py-2 text-sm font-semibold transition-colors ${
+                  active
+                    ? "border-primary bg-primary text-white"
+                    : "border-border hover:border-primary hover:text-primary bg-white"
+                }`}
+              >
+                {period.label}
+              </Link>
+            );
+          })}
+        </nav>
         <form className="mb-5 flex flex-wrap items-end gap-3">
           <label className="text-sm font-semibold">
             De

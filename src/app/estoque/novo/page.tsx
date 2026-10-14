@@ -1,13 +1,10 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { AppShell } from "@/components/layout/app-shell";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { createProduct } from "@/features/products/actions";
+import { ProductForm } from "@/features/products/product-form";
 
 export const instant = false;
-const input =
-  "mt-2 h-11 w-full rounded-xl border border-border bg-white px-3 outline-none focus:border-primary";
 
 export default async function NewProductPage({
   searchParams,
@@ -37,94 +34,7 @@ export default async function NewProductPage({
               Não foi possível salvar. Revise os campos.
             </p>
           )}
-          <form action={createProduct} className="space-y-5">
-            <label className="block text-sm font-semibold">
-              Nome
-              <input className={input} name="name" required minLength={2} />
-            </label>
-            <div className="grid gap-4 sm:grid-cols-3">
-              <label className="text-sm font-semibold">
-                Custo (R$)
-                <input
-                  className={input}
-                  name="costPrice"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  required
-                />
-              </label>
-              <label className="text-sm font-semibold">
-                Venda (R$)
-                <input
-                  className={input}
-                  name="salePrice"
-                  type="number"
-                  min="0.01"
-                  step="0.01"
-                  required
-                />
-              </label>
-              <label className="text-sm font-semibold">
-                Estoque mínimo
-                <input
-                  className={input}
-                  name="minStock"
-                  type="number"
-                  min="0"
-                  defaultValue="0"
-                  required
-                />
-              </label>
-            </div>
-            <fieldset>
-              <legend className="text-sm font-semibold">Tipo de grade</legend>
-              <div className="mt-3 flex gap-6">
-                <label>
-                  <input
-                    type="radio"
-                    name="gridType"
-                    value="single"
-                    defaultChecked
-                  />{" "}
-                  Tamanho único
-                </label>
-                <label>
-                  <input type="radio" name="gridType" value="sizes" /> P, M, G e
-                  GG
-                </label>
-              </div>
-            </fieldset>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-              {[
-                ["unico", "Único"],
-                ["p", "P"],
-                ["m", "M"],
-                ["g", "G"],
-                ["gg", "GG"],
-              ].map(([name, label]) => (
-                <label key={name} className="text-sm font-semibold">
-                  {label}
-                  <input
-                    className={input}
-                    name={name}
-                    type="number"
-                    min="0"
-                    defaultValue="0"
-                  />
-                </label>
-              ))}
-            </div>
-            <div className="flex justify-end gap-3">
-              <Link
-                href="/estoque"
-                className="border-border inline-flex h-10 items-center rounded-xl border px-4 text-sm font-semibold"
-              >
-                Cancelar
-              </Link>
-              <Button type="submit">Salvar produto</Button>
-            </div>
-          </form>
+          <ProductForm />
         </Card>
       </div>
     </AppShell>

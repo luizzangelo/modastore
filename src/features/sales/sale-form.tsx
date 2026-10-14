@@ -1,10 +1,10 @@
 "use client";
 
 import { Plus, Trash2 } from "lucide-react";
-import { useActionState, useMemo, useState } from "react";
+import { Fragment, useActionState, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { formatCurrency, formatDate } from "@/lib/formatters";
+import { formatCurrency, formatDate, formatPhone } from "@/lib/formatters";
 import { buildInstallments } from "@/lib/money";
 import { createSale, type SaleActionState } from "./actions";
 
@@ -29,7 +29,11 @@ export function SaleForm({
   variants: Variant[];
 }) {
   const [state, formAction, pending] = useActionState(createSale, initialState);
+  const [customerType, setCustomerType] = useState<"new" | "existing">(
+    "existing",
+  );
   const [customerId, setCustomerId] = useState("");
+  const [customerSearch, setCustomerSearch] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("pix");
   const [items, setItems] = useState([{ variant_id: "", quantity: 1 }]);
   const [manualTotal, setManualTotal] = useState(0);
@@ -48,6 +52,9 @@ export function SaleForm({
     [selectedItems, variants],
   );
   const total = selectedItems.length ? itemizedTotal : manualTotal;
+  const selectedCustomer = customers.find(
+    (customer) => customer.id === customerId,
+  );
   const preview =
     paymentMethod === "credit" && firstDueDate && total > 0
       ? buildInstallments(total, installments, firstDueDate)
@@ -87,30 +94,70 @@ export function SaleForm({
             <select
               className={input}
               name="customerType"
-              defaultValue="existing"
+              value={customerType}
+              onChange={(event) => {
+                setCustomerType(event.target.value as "new" | "existing");
+                setCustomerId("");
+                setCustomerSearch("");
+              }}
             >
               <option value="new">Cliente novo</option>
               <option value="existing">Cliente antigo</option>
             </select>
           </label>
-          <label className="text-sm font-semibold">
-            Cliente cadastrado
-            <select
-              className={input}
-              name="customerId"
-              value={customerId}
-              onChange={(event) => setCustomerId(event.target.value)}
-            >
-              <option value="">Sem cliente / cadastrar abaixo</option>
-              {customers.map((customer) => (
-                <option key={customer.id} value={customer.id}>
-                  {customer.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          {!customerId && (
-            <>
+          {customerType === "existing" ? (
+            <Fragment key="existing-customer">
+              <label className="text-sm font-semibold">
+                Buscar cliente cadastrado
+                <input
+                  className={input}
+                  type="search"
+                  list="registered-customers"
+                  value={customerSearch}
+                  placeholder="Digite o nome do cliente"
+                  autoComplete="off"
+                  required
+                  onChange={(event) => {
+                    const search = event.target.value;
+                    const normalized = search.trim().toLocaleLowerCase("pt-BR");
+                    const match = customers.find(
+                      (customer) =>
+                        customer.name.toLocaleLowerCase("pt-BR") ===
+                          normalized ||
+                        `${customer.name} — ${formatPhone(customer.phone)}`.toLocaleLowerCase(
+                          "pt-BR",
+                        ) === normalized,
+                    );
+                    setCustomerSearch(search);
+                    setCustomerId(match?.id ?? "");
+                  }}
+                />
+                <datalist id="registered-customers">
+                  {customers.map((customer) => (
+                    <option
+                      key={customer.id}
+                      value={`${customer.name} — ${formatPhone(customer.phone)}`}
+                    />
+                  ))}
+                </datalist>
+              </label>
+              <input type="hidden" name="customerId" value={customerId} />
+              <input type="hidden" name="customerName" value="" />
+              <input type="hidden" name="customerPhone" value="" />
+              {selectedCustomer && (
+                <div className="border-border rounded-xl border bg-zinc-50 p-4 sm:col-span-2">
+                  <p className="text-muted text-xs font-semibold tracking-wide uppercase">
+                    Cliente selecionado
+                  </p>
+                  <p className="mt-1 font-bold">{selectedCustomer.name}</p>
+                  <p className="text-muted mt-1 text-sm">
+                    Telefone: {formatPhone(selectedCustomer.phone)}
+                  </p>
+                </div>
+              )}
+            </Fragment>
+          ) : (
+            <Fragment key="new-customer">
               <label className="text-sm font-semibold">
                 Nome do cliente (opcional)
                 <input className={input} name="customerName" maxLength={160} />
@@ -124,13 +171,8 @@ export function SaleForm({
                   placeholder="(85) 99999-9999"
                 />
               </label>
-            </>
-          )}
-          {customerId && (
-            <>
-              <input type="hidden" name="customerName" value="" />
-              <input type="hidden" name="customerPhone" value="" />
-            </>
+              <input type="hidden" name="customerId" value="" />
+            </Fragment>
           )}
           <label className="text-sm font-semibold">
             Data da compra

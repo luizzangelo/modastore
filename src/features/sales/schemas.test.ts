@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { saleSchema } from "./schemas";
 
 const base = {
-  customerType: "existing",
+  customerType: "new",
   customerId: "",
   customerName: "",
   customerPhone: "",
@@ -28,6 +28,12 @@ describe("saleSchema", () => {
     expect(saleSchema.safeParse({ ...base, totalAmount: "0" }).success).toBe(
       false,
     );
+  });
+
+  it("requires a registered customer for an existing customer sale", () => {
+    expect(
+      saleSchema.safeParse({ ...base, customerType: "existing" }).success,
+    ).toBe(false);
   });
 
   it("requires customer and due date for credit", () => {
