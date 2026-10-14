@@ -1,5 +1,5 @@
 begin;
-select plan(39);
+select plan(43);
 
 select has_table('public', 'stores', 'stores exists');
 select has_table('public', 'receivable_payments', 'payments exists');
@@ -68,6 +68,15 @@ select is(
   0::numeric,
   'unpaid credit installments do not count as revenue'
 );
+select is(
+  (select net_profit from public.get_monthly_reports('2026-11-01', '2026-11-30')),
+  0::numeric,
+  'unpaid credit installments do not count as profit'
+);
+select ok(
+  (select net_profit <= revenue from public.get_monthly_reports('2026-10-01', '2026-10-31')),
+  'monthly profit does not exceed revenue'
+);
 select lives_ok(
   $$select public.register_receivable_payment((select id from public.receivables where sale_id = (select id from public.sales where total_amount = 101 and payment_method = 'credit' limit 1) order by installment_number limit 1), 10, '2026-11-15', 'pix', 'receita novembro')$$,
   'credit payment is registered in its payment month'
@@ -76,6 +85,15 @@ select is(
   (select revenue from public.get_monthly_reports('2026-11-01', '2026-11-30')),
   10::numeric,
   'credit payment counts as revenue only in the month it was paid'
+);
+select is(
+  (select round(net_profit, 2) from public.get_monthly_reports('2026-11-01', '2026-11-30')),
+  6.04::numeric,
+  'credit profit is recognized proportionally in the payment month'
+);
+select ok(
+  (select net_profit <= revenue from public.get_monthly_reports('2026-11-01', '2026-11-30')),
+  'credit profit does not exceed received revenue'
 );
 
 select lives_ok(
