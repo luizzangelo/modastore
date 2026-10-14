@@ -700,6 +700,42 @@ export type Database = {
         Returns: string[];
       };
       create_sale: { Args: { payload: Json }; Returns: string };
+      get_dashboard_summary: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          low_stock: number;
+          new_customers_week: number;
+          overdue: number;
+          products_total: number;
+          sales_month: number;
+          sales_previous_month: number;
+          sales_today: number;
+          sales_yesterday: number;
+          total_outstanding: number;
+        }[];
+      };
+      get_monthly_reports: {
+        Args: { p_end: string; p_start: string };
+        Returns: {
+          credit_sold: number;
+          month: string;
+          net_profit: number;
+          new_customers: number;
+          pieces_sold: number;
+          received: number;
+          revenue: number;
+        }[];
+      };
+      get_top_customers: {
+        Args: { p_end: string; p_start: string };
+        Returns: {
+          customer_id: string;
+          last_purchase: string;
+          name: string;
+          purchases_count: number;
+          total_spent: number;
+        }[];
+      };
       register_receivable_payment: {
         Args: {
           p_amount: number;
