@@ -1,5 +1,5 @@
 begin;
-select plan(35);
+select plan(39);
 
 select has_table('public', 'stores', 'stores exists');
 select has_table('public', 'receivable_payments', 'payments exists');
@@ -58,6 +58,25 @@ select lives_ok(
 );
 select is((select sum(amount) from public.receivables where sale_id = (select id from public.sales where total_amount = 101 and payment_method = 'credit' limit 1)), 101.00::numeric, 'installments sum exactly to total');
 select is((select count(*)::integer from public.receivables where sale_id = (select id from public.sales where total_amount = 101 and payment_method = 'credit' limit 1)), 2, 'credit sale creates installments');
+select is(
+  (select revenue from public.get_monthly_reports('2026-10-13', '2026-10-13')),
+  259.90::numeric,
+  'monthly revenue counts cash sales and only received credit amounts'
+);
+select is(
+  (select revenue from public.get_monthly_reports('2026-11-01', '2026-11-30')),
+  0::numeric,
+  'unpaid credit installments do not count as revenue'
+);
+select lives_ok(
+  $$select public.register_receivable_payment((select id from public.receivables where sale_id = (select id from public.sales where total_amount = 101 and payment_method = 'credit' limit 1) order by installment_number limit 1), 10, '2026-11-15', 'pix', 'receita novembro')$$,
+  'credit payment is registered in its payment month'
+);
+select is(
+  (select revenue from public.get_monthly_reports('2026-11-01', '2026-11-30')),
+  10::numeric,
+  'credit payment counts as revenue only in the month it was paid'
+);
 
 select lives_ok(
   $$select public.register_receivable_payment('60000000-0000-0000-0000-000000000002', 20, current_date, 'pix', 'teste pgTAP')$$,

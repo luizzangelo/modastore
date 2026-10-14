@@ -1,7 +1,14 @@
 "use client";
 
-import { Plus, Trash2 } from "lucide-react";
-import { Fragment, useActionState, useMemo, useState } from "react";
+import { Check, ChevronDown, Plus, Trash2 } from "lucide-react";
+import {
+  Fragment,
+  useActionState,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatCurrency, formatDate, formatPhone } from "@/lib/formatters";
@@ -21,6 +28,14 @@ const input =
   "mt-2 h-11 w-full rounded-xl border border-border bg-white px-3 outline-none focus:border-primary";
 const initialState: SaleActionState = { message: "" };
 
+function normalizeSearch(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR")
+    .trim();
+}
+
 export function SaleForm({
   customers,
   variants,
@@ -34,6 +49,8 @@ export function SaleForm({
   );
   const [customerId, setCustomerId] = useState("");
   const [customerSearch, setCustomerSearch] = useState("");
+  const [customerListOpen, setCustomerListOpen] = useState(false);
+  const customerPicker = useRef<HTMLDivElement>(null);
   const [paymentMethod, setPaymentMethod] = useState("pix");
   const [items, setItems] = useState([{ variant_id: "", quantity: 1 }]);
   const [manualTotal, setManualTotal] = useState(0);
@@ -55,10 +72,30 @@ export function SaleForm({
   const selectedCustomer = customers.find(
     (customer) => customer.id === customerId,
   );
+  const matchingCustomers = useMemo(() => {
+    const search = normalizeSearch(customerSearch);
+    return customers
+      .filter(
+        (customer) =>
+          !search || normalizeSearch(customer.name).includes(search),
+      )
+      .slice(0, 10);
+  }, [customerSearch, customers]);
   const preview =
     paymentMethod === "credit" && firstDueDate && total > 0
       ? buildInstallments(total, installments, firstDueDate)
       : [];
+
+  useEffect(() => {
+    function closeCustomerList(event: PointerEvent) {
+      if (!customerPicker.current?.contains(event.target as Node)) {
+        setCustomerListOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", closeCustomerList);
+    return () => document.removeEventListener("pointerdown", closeCustomerList);
+  }, []);
 
   function updateItem(
     index: number,
@@ -107,40 +144,84 @@ export function SaleForm({
           </label>
           {customerType === "existing" ? (
             <Fragment key="existing-customer">
-              <label className="text-sm font-semibold">
-                Buscar cliente cadastrado
-                <input
-                  className={input}
-                  type="search"
-                  list="registered-customers"
-                  value={customerSearch}
-                  placeholder="Digite o nome do cliente"
-                  autoComplete="off"
-                  required
-                  onChange={(event) => {
-                    const search = event.target.value;
-                    const normalized = search.trim().toLocaleLowerCase("pt-BR");
-                    const match = customers.find(
-                      (customer) =>
-                        customer.name.toLocaleLowerCase("pt-BR") ===
-                          normalized ||
-                        `${customer.name} — ${formatPhone(customer.phone)}`.toLocaleLowerCase(
-                          "pt-BR",
-                        ) === normalized,
-                    );
-                    setCustomerSearch(search);
-                    setCustomerId(match?.id ?? "");
-                  }}
-                />
-                <datalist id="registered-customers">
-                  {customers.map((customer) => (
-                    <option
-                      key={customer.id}
-                      value={`${customer.name} — ${formatPhone(customer.phone)}`}
-                    />
-                  ))}
-                </datalist>
-              </label>
+              <div
+                className="relative text-sm font-semibold"
+                ref={customerPicker}
+              >
+                <label htmlFor="registered-customer-search">
+                  Buscar cliente cadastrado
+                </label>
+                <div className="relative">
+                  <input
+                    id="registered-customer-search"
+                    className={`${input} pr-10`}
+                    type="search"
+                    value={customerSearch}
+                    placeholder="Digite o nome do cliente"
+                    autoComplete="off"
+                    required
+                    role="combobox"
+                    aria-autocomplete="list"
+                    aria-expanded={customerListOpen}
+                    aria-controls="registered-customers"
+                    onFocus={() => setCustomerListOpen(true)}
+                    onChange={(event) => {
+                      const search = event.target.value;
+                      setCustomerSearch(search);
+                      setCustomerId("");
+                      setCustomerListOpen(true);
+                    }}
+                  />
+                  <ChevronDown
+                    aria-hidden="true"
+                    className="text-muted pointer-events-none absolute top-1/2 right-3 mt-1 -translate-y-1/2"
+                    size={18}
+                  />
+                </div>
+                {customerListOpen && (
+                  <div
+                    id="registered-customers"
+                    role="listbox"
+                    className="border-border absolute z-20 mt-2 max-h-64 w-full overflow-y-auto rounded-xl border bg-white p-1.5 shadow-lg"
+                  >
+                    {matchingCustomers.length ? (
+                      matchingCustomers.map((customer) => (
+                        <button
+                          key={customer.id}
+                          type="button"
+                          role="option"
+                          aria-selected={customer.id === customerId}
+                          className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left outline-none hover:bg-violet-50 focus:bg-violet-50"
+                          onClick={() => {
+                            setCustomerId(customer.id);
+                            setCustomerSearch(customer.name);
+                            setCustomerListOpen(false);
+                          }}
+                        >
+                          <span>
+                            <span className="block font-semibold">
+                              {customer.name}
+                            </span>
+                            <span className="text-muted block text-xs font-normal">
+                              {formatPhone(customer.phone)}
+                            </span>
+                          </span>
+                          {customer.id === customerId && (
+                            <Check
+                              className="text-primary shrink-0"
+                              size={18}
+                            />
+                          )}
+                        </button>
+                      ))
+                    ) : (
+                      <p className="text-muted px-3 py-4 text-center text-sm font-normal">
+                        Nenhum cliente encontrado.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
               <input type="hidden" name="customerId" value={customerId} />
               <input type="hidden" name="customerName" value="" />
               <input type="hidden" name="customerPhone" value="" />

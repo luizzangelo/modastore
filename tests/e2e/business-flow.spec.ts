@@ -46,6 +46,7 @@ test("completes the core store workflow", async ({ page }) => {
   await page.goto("/vendas/novo");
   await page.waitForLoadState("networkidle");
   await page.getByLabel("Buscar cliente cadastrado").fill(customerName);
+  await page.getByRole("option", { name: new RegExp(customerName) }).click();
   await expect(page.getByText("Cliente selecionado")).toBeVisible();
   await expect(page.getByText(/Telefone: \(85\) 9\d{4}-\d{4}/)).toBeVisible();
   await page.getByLabel("Custo total (R$)").fill("30");
@@ -58,6 +59,7 @@ test("completes the core store workflow", async ({ page }) => {
   await page.goto("/vendas/novo");
   await page.waitForLoadState("networkidle");
   await page.getByLabel("Buscar cliente cadastrado").fill(customerName);
+  await page.getByRole("option", { name: new RegExp(customerName) }).click();
   await page.getByLabel("Custo total (R$)").fill("40");
   await page.getByLabel("Valor total (R$)").fill("120");
   await page.getByLabel("Quantidade de peças").fill("2");
@@ -82,6 +84,14 @@ test("completes the core store workflow", async ({ page }) => {
   const dialog = page.getByRole("dialog", { name: "Receber parcela" });
   await dialog.getByRole("button", { name: "Confirmar recebimento" }).click();
   await expect(page).toHaveURL(/\/contas-a-receber\?paid=1/);
+
+  await page.goto("/clientes");
+  await page.getByLabel("Buscar cliente").fill(customerName.slice(0, 12));
+  await expect(
+    page.getByRole("cell", { name: customerName, exact: true }),
+  ).toBeVisible();
+  await page.getByLabel("Buscar cliente").fill("cliente que nao existe");
+  await expect(page.getByText("Nenhum cliente encontrado")).toBeVisible();
 
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
