@@ -14,3 +14,4 @@ Todas as mudanças relevantes serão registradas neste arquivo seguindo Semantic
 - Fluxo de vendas itemizadas ou manuais, fiado parcelado, histórico, cancelamento e comprovante CSV.
 - Contas a receber manuais e automáticas, pagamentos parciais, quitação, cobrança e estorno.
 - Dashboard operacional e relatórios mensais com ranking de clientes.
+- Configurações do nome da loja e alteração segura de senha.
