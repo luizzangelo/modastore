@@ -16,3 +16,4 @@ Todas as mudanças relevantes serão registradas neste arquivo seguindo Semantic
 - Dashboard operacional e relatórios mensais com ranking de clientes.
 - Configurações do nome da loja e alteração segura de senha.
 - Manifesto Docker Swarm com Traefik e instruções exatas de DNS no Cloudflare.
+- Teste E2E do fluxo principal, do login aos relatórios e recebimentos.

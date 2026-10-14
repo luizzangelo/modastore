@@ -25,6 +25,15 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm exec supabase start
+      - run: pnpm exec supabase db reset
       - run: pnpm db:test
       - run: pnpm db:lint
       - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: End-to-end tests
+        run: |
+          set -a
+          eval "$(pnpm exec supabase status -o env --override-name api.url=NEXT_PUBLIC_SUPABASE_URL --override-name auth.anon_key=NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)"
+          set +a
+          export NEXT_PUBLIC_ALLOW_SIGNUP=false
+          pnpm test:e2e

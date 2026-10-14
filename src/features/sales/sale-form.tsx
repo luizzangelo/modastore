@@ -185,6 +185,7 @@ export function SaleForm({
             >
               <select
                 className={input}
+                name="variantId"
                 value={item.variant_id}
                 onChange={(event) =>
                   updateItem(index, "variant_id", event.target.value)
@@ -201,6 +202,7 @@ export function SaleForm({
               </select>
               <input
                 className={input}
+                name="quantity"
                 value={item.quantity}
                 onChange={(event) =>
                   updateItem(index, "quantity", event.target.value)
@@ -250,7 +252,6 @@ export function SaleForm({
                 type="number"
                 min="0.01"
                 step="0.01"
-                required
                 onChange={(event) => setManualTotal(Number(event.target.value))}
               />
             </label>

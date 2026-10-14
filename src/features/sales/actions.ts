@@ -18,6 +18,15 @@ export async function createSale(
   } catch {
     return { message: "Os produtos selecionados são inválidos." };
   }
+  if (Array.isArray(items) && items.length === 0) {
+    const variantIds = formData.getAll("variantId").map(String);
+    const quantities = formData.getAll("quantity").map(Number);
+    items = variantIds.flatMap((variantId, index) =>
+      variantId
+        ? [{ variant_id: variantId, quantity: quantities[index] ?? 0 }]
+        : [],
+    );
+  }
 
   const parsed = saleSchema.safeParse({
     customerType: formData.get("customerType"),

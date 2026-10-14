@@ -1,5 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { connection } from "next/server";
 import { AppShell } from "@/components/layout/app-shell";
 import { SaleForm } from "@/features/sales/sale-form";
 import { createClient } from "@/lib/supabase/server";
@@ -7,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 export const instant = false;
 
 export default async function NewSalePage() {
+  await connection();
   const supabase = await createClient();
   const [{ data: customers }, { data: products }, { data: variants }] =
     await Promise.all([

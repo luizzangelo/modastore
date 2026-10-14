@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { AppShell } from "@/components/layout/app-shell";
 import { Card } from "@/components/ui/card";
 import { ReportCharts } from "@/features/reports/report-charts";
@@ -22,6 +23,7 @@ export default async function ReportsPage({
 }: {
   searchParams: Promise<{ start?: string; end?: string }>;
 }) {
+  await connection();
   const selected = await searchParams;
   const defaults = defaultPeriod();
   const start = /^\d{4}-\d{2}-\d{2}$/.test(selected.start ?? "")
