@@ -1,12 +1,13 @@
 "use client";
 
-import { MessageCircle, Search, Users } from "lucide-react";
+import { MessageCircle, Search, Trash2, Users, X } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatCurrency, formatDate, formatPhone } from "@/lib/formatters";
-import { toggleCustomer } from "./actions";
+import { deleteCustomer, toggleCustomer } from "./actions";
 
 type Customer = {
   id: string | null;
@@ -28,6 +29,10 @@ function normalizeSearch(value: string) {
 
 export function CustomerList({ customers }: { customers: Customer[] }) {
   const [search, setSearch] = useState("");
+  const [blockedMessage, setBlockedMessage] = useState("");
+  const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(
+    null,
+  );
   const filteredCustomers = useMemo(() => {
     const query = normalizeSearch(search);
     return query
@@ -39,6 +44,21 @@ export function CustomerList({ customers }: { customers: Customer[] }) {
 
   return (
     <>
+      {blockedMessage && (
+        <div
+          className="mb-4 flex items-center justify-between gap-3 rounded-xl bg-red-50 p-3 text-sm text-red-700"
+          role="alert"
+        >
+          <span>{blockedMessage}</span>
+          <button
+            type="button"
+            aria-label="Fechar aviso"
+            onClick={() => setBlockedMessage("")}
+          >
+            <X size={18} />
+          </button>
+        </div>
+      )}
       <div className="mb-4 max-w-lg" role="search">
         <label className="border-border focus-within:border-primary flex h-11 items-center gap-2 rounded-xl border bg-white px-3">
           <Search className="text-muted" size={18} aria-hidden="true" />
@@ -122,6 +142,32 @@ export function CustomerList({ customers }: { customers: Customer[] }) {
                             {customer.active ? "Inativar" : "Ativar"}
                           </button>
                         </form>
+                        <button
+                          type="button"
+                          aria-label={`Excluir ${customer.name}`}
+                          title={
+                            (customer.purchases_count ?? 0) > 0
+                              ? "Cancele as vendas antes de excluir o cliente"
+                              : "Excluir cliente"
+                          }
+                          className={
+                            (customer.purchases_count ?? 0) > 0
+                              ? "text-zinc-300"
+                              : "text-red-600 hover:text-red-700"
+                          }
+                          onClick={() => {
+                            if ((customer.purchases_count ?? 0) > 0) {
+                              setBlockedMessage(
+                                `Cancele todas as vendas de ${customer.name ?? "cliente"} antes de excluir o cadastro.`,
+                              );
+                              return;
+                            }
+                            setBlockedMessage("");
+                            setCustomerToDelete(customer);
+                          }}
+                        >
+                          <Trash2 size={18} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -144,6 +190,59 @@ export function CustomerList({ customers }: { customers: Customer[] }) {
           </div>
         )}
       </Card>
+
+      {customerToDelete && (
+        <div
+          className="fixed inset-0 z-50 grid place-items-center bg-black/35 p-4"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setCustomerToDelete(null);
+          }}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-customer-title"
+          >
+            <div className="flex items-center justify-between gap-4">
+              <h2 id="delete-customer-title" className="text-xl font-bold">
+                Excluir cliente
+              </h2>
+              <button
+                type="button"
+                aria-label="Fechar"
+                onClick={() => setCustomerToDelete(null)}
+              >
+                <X />
+              </button>
+            </div>
+            <p className="text-muted mt-3 text-sm">
+              O cadastro de <strong>{customerToDelete.name}</strong> será
+              excluído permanentemente. Deseja continuar?
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setCustomerToDelete(null)}
+              >
+                Cancelar
+              </Button>
+              <form action={deleteCustomer}>
+                <input
+                  type="hidden"
+                  name="id"
+                  value={customerToDelete.id ?? ""}
+                />
+                <Button type="submit" className="bg-red-600 hover:bg-red-700">
+                  Excluir cliente
+                </Button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

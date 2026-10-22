@@ -81,3 +81,26 @@ export async function toggleCustomer(formData: FormData) {
     .eq("id", id.data);
   revalidatePath("/clientes");
 }
+
+export async function deleteCustomer(formData: FormData) {
+  const id = customerIdSchema.safeParse(formData.get("id"));
+  if (!id.success) redirect("/clientes?error=invalid");
+
+  const { supabase } = await getAuthenticatedStore();
+  const { error } = await supabase.rpc("delete_customer", {
+    p_customer_id: id.data,
+  });
+
+  if (error?.message.includes("Cancele todas as vendas")) {
+    redirect("/clientes?error=sales");
+  }
+  if (error?.message.includes("contas a receber")) {
+    redirect("/clientes?error=receivables");
+  }
+  if (error) redirect("/clientes?error=delete");
+
+  revalidatePath("/clientes");
+  revalidatePath("/vendas");
+  revalidatePath("/contas-a-receber");
+  redirect("/clientes?deleted=1");
+}

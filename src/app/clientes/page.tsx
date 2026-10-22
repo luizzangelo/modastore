@@ -12,10 +12,11 @@ export default async function CustomersPage({
   searchParams: Promise<{
     created?: string;
     updated?: string;
+    deleted?: string;
     error?: string;
   }>;
 }) {
-  const { created, updated, error } = await searchParams;
+  const { created, updated, deleted, error } = await searchParams;
   const supabase = await createClient();
   const { data: customers } = await supabase
     .from("customer_summary")
@@ -41,9 +42,11 @@ export default async function CustomersPage({
           </Link>
         </div>
 
-        {(created || updated) && (
+        {(created || updated || deleted) && (
           <p className="mb-4 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700">
-            Cliente {created ? "cadastrado" : "atualizado"} com sucesso.
+            Cliente{" "}
+            {created ? "cadastrado" : updated ? "atualizado" : "excluído"} com
+            sucesso.
           </p>
         )}
         {error && (
@@ -51,7 +54,11 @@ export default async function CustomersPage({
             role="alert"
             className="mb-4 rounded-xl bg-red-50 p-3 text-sm text-red-700"
           >
-            Não foi possível concluir a operação.
+            {error === "sales"
+              ? "Cancele todas as vendas do cliente antes de excluir o cadastro."
+              : error === "receivables"
+                ? "Exclua as contas a receber do cliente antes de excluir o cadastro."
+                : "Não foi possível concluir a operação."}
           </p>
         )}
 

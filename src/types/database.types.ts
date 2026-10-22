@@ -689,6 +689,10 @@ export type Database = {
     };
     Functions: {
       cancel_sale: { Args: { p_sale_id: string }; Returns: undefined };
+      delete_customer: {
+        Args: { p_customer_id: string };
+        Returns: undefined;
+      };
       create_manual_receivables: {
         Args: {
           p_customer_id: string;
